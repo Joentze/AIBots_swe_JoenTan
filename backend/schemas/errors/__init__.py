@@ -1,11 +1,11 @@
 """typing for APIError"""
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class APIError(BaseModel):
     """type for APIError"""
-    code: int
-    message: str
+    code: int = Field(...)
+    message: str = Field(...)
     request: object
     details: object
 
