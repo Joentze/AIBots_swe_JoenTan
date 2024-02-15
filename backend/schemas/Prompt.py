@@ -1,9 +1,9 @@
 """typings for prompt"""
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from schemas.QueryRole import QueryRoleType
 
 
 class Prompt(BaseModel):
     """type for Prompt"""
-    role: QueryRoleType
-    content: str
+    role: QueryRoleType = Field(...)
+    content: str = Field(...)
