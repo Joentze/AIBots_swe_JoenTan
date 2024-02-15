@@ -6,6 +6,7 @@ from motor.motor_asyncio import AsyncIOMotorClient
 from schemas.Conversation import Conversation, ConversationFull
 from schemas.responses import CreatedResponse
 from pydantic import ValidationError, error_wrappers
+from schemas.requests import ConversationPUT
 from beanie import init_beanie
 
 app = FastAPI()
@@ -49,8 +50,11 @@ async def get_conversations():
 
 
 @app.put("/conversations/{id}")
-async def updates_conversation():
+async def updates_conversation(id: str, convo: ConversationPUT):
     """Allows the user to customise parameters and properties of a Conversation, thereby customising their experience"""
+    doc = await Conversation.get(id)
+    resp = await doc.set({Conversation.name: convo.name, Conversation.params: convo.params})
+    print(resp)
     return {"message": "Hello, World"}
 
 
