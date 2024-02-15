@@ -60,7 +60,7 @@ async def updates_conversation(id: str, convo: ConversationPUT):
     try:
         doc = await Conversation.get(id)
         await doc.set({Conversation.name: convo.name, Conversation.params: convo.params})
-    except ValidationError:
+    except AttributeError:
         return JSONResponse(content={"code": 404,
                                      "message": "Specified resource(s) was not found"},
                             status_code=404)
@@ -71,23 +71,45 @@ async def updates_conversation(id: str, convo: ConversationPUT):
                             status_code=500)
 
 
-@app.get("/conversations/{id}")
-async def get_conversation_history():
+@app.get("/conversations/{id}", response_model=ConversationFull, status_code=200)
+async def get_conversation_history(id: str):
     """Retrieves the entire conversation history with the LLM"""
-    return {"message": "Hello, World"}
+    try:
+        return await ConversationFull.get(id)
+
+    except AttributeError:
+        return JSONResponse(content={"code": 404,
+                                     "message": "Specified resource(s) was not found"},
+                            status_code=404)
+    except Exception as e:
+        print(e)
+        return JSONResponse(content={"code": 500,
+                                     "message": "Internal Server Error"},
+                            status_code=500)
 
 
-@app.delete("/conversations/{id}")
-async def delete_conversation():
+@app.delete("/conversations/{id}", status_code=204)
+async def delete_conversation(id: str):
     """Deletes the entire conversation history with the LLM Model"""
-    return {"message": "Hello, World"}
+    try:
+        convo = await ConversationFull.get(id)
+        await convo.delete()
+    except AttributeError:
+        return JSONResponse(content={"code": 404,
+                                     "message": "Specified resource(s) was not found"},
+                            status_code=404)
+    except Exception as e:
+        print(e)
+        return JSONResponse(content={"code": 500,
+                                     "message": "Internal Server Error"},
+                            status_code=500)
 
 
-@app.post("/queries")
+@app.post("/queries", response_model=CreatedResponse)
 async def send_prompt_query(id: str):
     """This action sends a new Prompt query to the LLM and returns its response. If any errors occur when sending the prompt to the LLM, then a 422 error should be raised."""
-    await add_to_message_history(id, {"role": "user", "content": "hello"})
-    return {"message": "Hello, World"}
+    response = await add_to_message_history(id, {"role": "user", "content": "hello"})
+    return {"id": response.to_json()["id"]}
 
 
 @app.exception_handler(RequestValidationError)
