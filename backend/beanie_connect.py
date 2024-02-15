@@ -15,8 +15,8 @@ async def init():
 
     # Init beanie with the Product document class
     await init_beanie(database=client.db_name, document_models=[Conversation])
-    convo = Conversation(name="hello", model="hot", tokens=12, params={})
-    await convo.insert()
+    alls = await Conversation.find_all().to_list()
+    print(alls)
 
 
 if __name__ == "__main__":
