@@ -1,11 +1,9 @@
 """api"""
 from fastapi import FastAPI, Response, Request, status
-from fastapi.exceptions import RequestValidationError
+from fastapi.exceptions import RequestValidationError, HTTPException
 from fastapi.responses import JSONResponse
 from motor.motor_asyncio import AsyncIOMotorClient
 from schemas.Conversation import Conversation, ConversationFull
-# from schemas.requests import ConversationPOST, ConversationPUT
-from schemas.errors import InvalidParametersError
 from schemas.responses import CreatedResponse
 from pydantic import ValidationError, error_wrappers
 from beanie import init_beanie
@@ -33,14 +31,21 @@ async def create_conversation(convo: Conversation):
     try:
         obj = await convo.insert()
         return {"id": obj.to_json()["id"]}
-    except ValidationError as e:
-        raise Exception(e)
+    except Exception as e:
+        return JSONResponse(content={"code": 500,
+                                     "message": "Internal Server Error"},
+                            status_code=500)
 
 
 @app.get("/conversations")
 async def get_conversations():
     """Retrieves all the conversations that a user has created, the conversation history is not provided here"""
-    return await Conversation.find_all().to_list()
+    try:
+        return await Conversation.find_all().to_list()
+    except Exception as e:
+        return JSONResponse(content={"code": 500,
+                                     "message": "Internal Server Error"},
+                            status_code=500)
 
 
 @app.put("/conversations/{id}")
@@ -69,4 +74,5 @@ async def send_prompt_query():
 
 @app.exception_handler(RequestValidationError)
 async def invalid_parameter_error(request: Request, exc: error_wrappers.ValidationError):
+    """handles invalid parameters"""
     return JSONResponse(content={"code": 400, "message": "Invalid Parameters Provided"}, status_code=400)
