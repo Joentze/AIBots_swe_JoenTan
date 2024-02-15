@@ -1,6 +1,6 @@
 """typings for prompt"""
 from pydantic import BaseModel
-from api_types.QueryRole import QueryRoleType
+from schemas.QueryRole import QueryRoleType
 
 
 class Prompt(BaseModel):
