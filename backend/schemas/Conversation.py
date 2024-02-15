@@ -1,10 +1,11 @@
 """typing for Conversations"""
-from pydantic import BaseModel, UUID4, Field
+from beanie import Document
+from pydantic import UUID4, Field
 
 
-class Conversation(BaseModel):
+class Conversation(Document):
     """type for Conversation"""
-    id: UUID4 = Field(...)
+    # id: UUID4 = Field(...)
     name: str = Field(..., max_length=200)
     params: object = Field(...)
     tokens: int = Field(..., ge=0)
