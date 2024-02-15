@@ -1,10 +1,10 @@
 """types for conversation responses"""
-from pydantic import BaseModel, UUID4, Field
+from pydantic import BaseModel, UUID1, Field
 
 
 class CreatedResponse(BaseModel):
     """type for CreatedResponse"""
-    id: UUID4 = Field(...)
+    id: str = Field(...)
 
 
 class UpdatedResponse(BaseModel):
