@@ -1,18 +1,17 @@
 """Backend API"""
 import os
-from fastapi import FastAPI, Response, Request, status
-from fastapi.exceptions import RequestValidationError, HTTPException
+from fastapi import FastAPI, Request
+from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from motor.motor_asyncio import AsyncIOMotorClient
 from schemas.Conversation import Conversation, ConversationFull, ConversationList
 from schemas.responses import CreatedResponse
 from schemas.Prompt import Prompt
-from pydantic import ValidationError, error_wrappers
+from pydantic import error_wrappers
 from schemas.requests import ConversationPUT
 from beanie import init_beanie
 from handlers.mongo_handler import add_to_message_history
 from handlers.openai_handler import get_completion
-from asyncio import run
 
 app = FastAPI()
 
