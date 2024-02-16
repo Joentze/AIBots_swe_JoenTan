@@ -1,14 +1,17 @@
-"""api"""
+"""Backend API"""
 from fastapi import FastAPI, Response, Request, status
 from fastapi.exceptions import RequestValidationError, HTTPException
 from fastapi.responses import JSONResponse
 from motor.motor_asyncio import AsyncIOMotorClient
 from schemas.Conversation import Conversation, ConversationFull, ConversationList
 from schemas.responses import CreatedResponse
+from schemas.Prompt import Prompt
 from pydantic import ValidationError, error_wrappers
 from schemas.requests import ConversationPUT
 from beanie import init_beanie
-from mongo_handler import add_to_message_history
+from handlers.mongo_handler import add_to_message_history
+from handlers.openai_handler import get_completion
+from asyncio import run
 
 app = FastAPI()
 
@@ -45,7 +48,7 @@ async def create_conversation(convo: Conversation):
 async def get_conversations():
     """Retrieves all the conversations that a user has created, the conversation history is not provided here"""
     try:
-        data = {"data": await Conversation.find_all().to_list()}
+        data = {"data": await ConversationFull.find_all().to_list()}
         return data
     except Exception as e:
         print(e)
@@ -88,7 +91,7 @@ async def get_conversation_history(id: str):
                             status_code=500)
 
 
-@app.delete("/conversations/{id}", status_code=204)
+@app.delete("/conversations/{id}", status_code=200)
 async def delete_conversation(id: str):
     """Deletes the entire conversation history with the LLM Model"""
     try:
@@ -105,14 +108,33 @@ async def delete_conversation(id: str):
                             status_code=500)
 
 
-@app.post("/queries", response_model=CreatedResponse)
-async def send_prompt_query(id: str):
+@app.post("/queries", response_model=CreatedResponse, status_code=200)
+async def send_prompt_query(id: str, prompt: Prompt):
     """This action sends a new Prompt query to the LLM and returns its response. If any errors occur when sending the prompt to the LLM, then a 422 error should be raised."""
-    response = await add_to_message_history(id, {"role": "user", "content": "hello"})
-    return {"id": response.to_json()["id"]}
+    try:
+        role, content = prompt.role, prompt.content
+        doc = await ConversationFull.get(id)
+        params = doc.params
+        message_history = [dict(message) for message in doc.messages]
+        message = await add_to_message_history(id, prompt)
+        llm_response = await get_completion([*message_history, {"role": role, "content": content}], params={"model": "gpt-3.5-turbo", **params})
+        message = await add_to_message_history(id, llm_response)
+        return {"id": message.to_json()["id"]}
+    except AttributeError:
+        return JSONResponse(content={"code": 404,
+                                     "message": "Specified resource(s) was not found"},
+                            status_code=404)
+    except Exception as e:
+        print(e)
+        return JSONResponse(content={"code": 500,
+                                     "message": "Internal Server Error"},
+                            status_code=500)
 
 
 @app.exception_handler(RequestValidationError)
 async def invalid_parameter_error(request: Request, exc: error_wrappers.ValidationError):
     """handles invalid parameters"""
     return JSONResponse(content={"code": 400, "message": "Invalid Parameters Provided"}, status_code=400)
+
+if __name__ == "__main__":
+    run(get_completion([{"role": "user", "content": "hello there"}]))

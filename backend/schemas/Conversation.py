@@ -25,7 +25,7 @@ class ConversationList(BaseModel):
 class ConversationFull(Conversation):
     """type for ConversationFull"""
     messages: List[Prompt]
-
+    
     def to_json(self):
         """converts to json"""
         return {"id": str(self.id), "messages": self.messages, "name": self.name, "params": self.params, "tokens": self.tokens}
