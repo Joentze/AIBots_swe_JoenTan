@@ -1,4 +1,5 @@
 """Backend API"""
+import os
 from fastapi import FastAPI, Response, Request, status
 from fastapi.exceptions import RequestValidationError, HTTPException
 from fastapi.responses import JSONResponse
@@ -22,7 +23,7 @@ async def init():
     """initialises beanie"""
     print("initialising beanie...")
     client = AsyncIOMotorClient(
-        "mongodb://root:example@localhost:27017/?authSource=admin&authMechanism=SCRAM-SHA-256"
+        os.environ["MONGODB_ROUTE"]
     )
     await init_beanie(database=client.db_name, document_models=[ConversationFull])
 
@@ -61,8 +62,8 @@ async def get_conversations():
 async def updates_conversation(id: str, convo: ConversationPUT):
     """Allows the user to customise parameters and properties of a Conversation, thereby customising their experience"""
     try:
-        doc = await Conversation.get(id)
-        await doc.set({Conversation.name: convo.name, Conversation.params: convo.params})
+        doc = await ConversationFull.get(id)
+        await doc.set({ConversationFull.name: convo.name, ConversationFull.params: convo.params})
     except AttributeError:
         return JSONResponse(content={"code": 404,
                                      "message": "Specified resource(s) was not found"},
@@ -112,16 +113,17 @@ async def delete_conversation(id: str):
 async def send_prompt_query(id: str, prompt: Prompt):
     """This action sends a new Prompt query to the LLM and returns its response. If any errors occur when sending the prompt to the LLM, then a 422 error should be raised."""
     try:
+        role, content = prompt.role, prompt.content
+
+        doc = await ConversationFull.get(id)
+
+        params = doc.params
+
+        message_history = [dict(message) for message in doc.messages]
+
+        await add_to_message_history(id, prompt)
+
         try:
-            role, content = prompt.role, prompt.content
-
-            doc = await ConversationFull.get(id)
-
-            params = doc.params
-
-            message_history = [dict(message) for message in doc.messages]
-
-            await add_to_message_history(id, prompt)
 
             llm_response = await get_completion([*message_history, {"role": role, "content": content}], params={"model": "gpt-3.5-turbo", **params})
 
@@ -150,4 +152,4 @@ async def invalid_parameter_error(request: Request, exc: error_wrappers.Validati
     return JSONResponse(content={"code": 400, "message": "Invalid Parameters Provided"}, status_code=400)
 
 if __name__ == "__main__":
-    run(get_completion([{"role": "user", "content": "hello there"}]))
+    pass
