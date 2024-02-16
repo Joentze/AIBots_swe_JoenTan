@@ -108,18 +108,31 @@ async def delete_conversation(id: str):
                             status_code=500)
 
 
-@app.post("/queries", response_model=CreatedResponse, status_code=200)
+@app.post("/queries", response_model=CreatedResponse, status_code=201)
 async def send_prompt_query(id: str, prompt: Prompt):
     """This action sends a new Prompt query to the LLM and returns its response. If any errors occur when sending the prompt to the LLM, then a 422 error should be raised."""
     try:
-        role, content = prompt.role, prompt.content
-        doc = await ConversationFull.get(id)
-        params = doc.params
-        message_history = [dict(message) for message in doc.messages]
-        message = await add_to_message_history(id, prompt)
-        llm_response = await get_completion([*message_history, {"role": role, "content": content}], params={"model": "gpt-3.5-turbo", **params})
-        message = await add_to_message_history(id, llm_response)
-        return {"id": message.to_json()["id"]}
+        try:
+            role, content = prompt.role, prompt.content
+
+            doc = await ConversationFull.get(id)
+
+            params = doc.params
+
+            message_history = [dict(message) for message in doc.messages]
+
+            await add_to_message_history(id, prompt)
+
+            llm_response = await get_completion([*message_history, {"role": role, "content": content}], params={"model": "gpt-3.5-turbo", **params})
+
+            message = await add_to_message_history(id, llm_response)
+
+            return {"id": message.to_json()["id"]}
+        except Exception as e:
+            print(e)
+            return JSONResponse(content={"code": 422,
+                                         "message": "Unable to create resource"},
+                                status_code=422)
     except AttributeError:
         return JSONResponse(content={"code": 404,
                                      "message": "Specified resource(s) was not found"},
