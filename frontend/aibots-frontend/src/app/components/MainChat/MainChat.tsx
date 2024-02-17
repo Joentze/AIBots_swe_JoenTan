@@ -14,19 +14,27 @@ import {
   QueryRole,
 } from "@/restHelpers/conversationHelper";
 import { useEffect, useRef, useState } from "react";
-import { IoSend } from "react-icons/io5";
+import { IoCog, IoSend } from "react-icons/io5";
 import MessageBox from "../Messages/MessageBox";
 import { postQuery } from "@/restHelpers/conversationHelper";
+import EditConvoPopup from "../Modal/EditConvoPopup";
 const MainChat = () => {
   const { conversationId, setConversationId } = useConversation();
   const [currPrompt, setCurrPrompt] = useState<string>("");
   const [messages, setMessages] = useState<Prompt[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
+  const [name, setName] = useState<string>("");
+  const [params, setParams] = useState<string>("");
   const bottomLine = useRef<HTMLDivElement>();
 
   useEffect(() => {
     const getChatHistory = async () => {
-      const { messages } = await getFullConversation(conversationId);
+      const { name, params, tokens, messages } = await getFullConversation(
+        conversationId
+      );
+      console.log(name, params);
+      setName(name);
+      setParams(JSON.stringify(params));
       setMessages(messages);
     };
     getChatHistory();
@@ -75,6 +83,8 @@ const MainChat = () => {
             placeholder="Chat here..."
             size="lg"
             rightSectionPointerEvents="all"
+            leftSectionPointerEvents="all"
+            leftSection={<EditConvoPopup name={name} params={params} />}
             rightSection={
               <ActionIcon size={"lg"} onClick={async () => sendPrompt()}>
                 {loading ? <Loader color="white" size={"sm"} /> : <IoSend />}

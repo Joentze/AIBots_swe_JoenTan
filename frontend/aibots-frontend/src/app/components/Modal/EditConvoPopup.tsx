@@ -1,21 +1,23 @@
 import { useDisclosure } from "@mantine/hooks";
-import { Modal, Button, Input, JsonInput } from "@mantine/core";
-import { IoAdd } from "react-icons/io5";
+import { Modal, Button, Input, JsonInput, ActionIcon } from "@mantine/core";
+import { IoAdd, IoCog } from "react-icons/io5";
 import { useState } from "react";
 import { useConversation } from "@/app/customHooks/conversationHooks";
 import { validateCreateConversation } from "@/validators/validateCreateConversation";
 import { createConversation } from "@/restHelpers/conversationHelper";
 
-const defaultParams = {
-  model: "gpt-4",
-};
+interface IEditConvoPopup {
+  name: string;
+  params: string;
+}
 
-const CreateConvoPopup = () => {
-  const [loading, setLoading] = useState<boolean>(false);
+const EditConvoPopup: React.FC<IEditConvoPopup> = ({ name, params }) => {
   const { conversationId, setConversationId } = useConversation();
+  const [loading, setLoading] = useState<boolean>(false);
   const [opened, { open, close }] = useDisclosure(false);
-  const [conversationName, setConversationName] = useState<string>("");
-  const [jsonValue, setJsonValue] = useState(JSON.stringify(defaultParams));
+  const [conversationName, setConversationName] = useState<string>(name);
+  const [jsonValue, setJsonValue] = useState(JSON.stringify(params));
+
   const createConvo = async () => {
     try {
       validateCreateConversation(conversationName, jsonValue);
@@ -33,13 +35,18 @@ const CreateConvoPopup = () => {
   };
   return (
     <>
-      <Modal opened={opened} onClose={close} title="Create a Conversation 📝">
+      <Modal
+        opened={opened}
+        onClose={close}
+        title="Edit Conversation Settings 📝"
+      >
         <Modal.Body>
           <Input.Wrapper
-            label="Conversation Name"
-            description="Organise your conversations by giving it a unique name!"
+            label="Rename Conversation"
+            description="Edit your conversation name to suit your task better!"
           >
             <Input
+              defaultValue={name}
               value={conversationName}
               placeholder="Example: an Exploration into Large Language Models"
               onChange={(event) => setConversationName(event.target.value)}
@@ -51,31 +58,33 @@ const CreateConvoPopup = () => {
             label="Conversation Parameters"
             description="Set OpenAI chat parameters"
           >
-            <JsonInput value={jsonValue} onChange={setJsonValue} mt={8} />
+            <JsonInput
+              defaultValue={params}
+              value={jsonValue}
+              onChange={setJsonValue}
+              mt={8}
+            />
           </Input.Wrapper>
           <br></br>
           <Button
+            loading={loading}
+            loaderProps={{ type: "dots" }}
             fullWidth
             onClick={async () => {
               await createConvo();
               close();
             }}
           >
-            Create!
+            Confirm
           </Button>
         </Modal.Body>
       </Modal>
 
-      <Button
-        leftSection={<IoAdd />}
-        onClick={open}
-        loading={loading}
-        loaderProps={{ type: "dots" }}
-      >
-        Add Conversation
-      </Button>
+      <ActionIcon size={"lg"} variant="light" onClick={open}>
+        <IoCog size={"md"} />
+      </ActionIcon>
     </>
   );
 };
 
-export default CreateConvoPopup;
+export default EditConvoPopup;
