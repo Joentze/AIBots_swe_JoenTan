@@ -1,0 +1,148 @@
+{
+	"info": {
+		"_postman_id": "821f66f6-5a73-4985-a0ce-f649844e184c",
+		"name": "Govtech AI Bots API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "15499661"
+	},
+	"item": [
+		{
+			"name": "Get all conversations",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8000/conversations",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"conversations"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Add a conversation",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"hello\",\n    \"params\": {},\n    \"tokens\": 43\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8000/conversations",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"conversations"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Updates conversation parameters",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"renamed\",\n    \"params\": {}\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8000/conversations/65d0240362594587b94f875e",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"conversations",
+						"65d0240362594587b94f875e"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete entire conversation",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8000/conversations/65cdf3bda6aa87111f2d59c2",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"conversations",
+						"65cdf3bda6aa87111f2d59c2"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Gets entire conversation history with conversation id",
+			"request": {
+				"method": "GET",
+				"header": []
+			},
+			"response": []
+		},
+		{
+			"name": "Queries LLM",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "\n    {\n        \"role\": \"user\",\n        \"content\": \"what is the weather in new york\"\n    }\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8000/queries?id=65d01a7e1c4e5ed6ef4fa69d",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"queries"
+					],
+					"query": [
+						{
+							"key": "id",
+							"value": "65d01a7e1c4e5ed6ef4fa69d"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
