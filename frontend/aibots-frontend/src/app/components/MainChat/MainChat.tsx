@@ -10,6 +10,7 @@ import { useConversation } from "@/app/customHooks/conversationHooks";
 import { getFullConversation, Prompt } from "@/restHelpers/conversationHelper";
 import { useEffect, useState } from "react";
 import { IoSend } from "react-icons/io5";
+import MessageBox from "../Messages/MessageBox";
 
 const MainChat = () => {
   const { conversationId, setConversationId } = useConversation();
@@ -22,10 +23,24 @@ const MainChat = () => {
     };
     getChatHistory();
   }, [conversationId]);
+
+  const sendPrompt = async () => {
+    setCurrPrompt("");
+  };
   return (
     <Container>
-      <ScrollArea h={850}></ScrollArea>
-      <Container>
+      <ScrollArea h={850}>
+        {messages !== undefined && messages.length > 0 ? (
+          <>
+            {messages.map((item, index) => (
+              <MessageBox role={item.role} content={item.content} key={index} />
+            ))}
+          </>
+        ) : (
+          <></>
+        )}
+      </ScrollArea>
+      <Container hidden={conversationId === undefined}>
         <Input
           value={currPrompt}
           onChange={(event) => setCurrPrompt(event.target.value)}
@@ -33,7 +48,7 @@ const MainChat = () => {
           size="lg"
           rightSectionPointerEvents="all"
           rightSection={
-            <ActionIcon size={"lg"} onClick={() => setCurrPrompt("")}>
+            <ActionIcon size={"lg"} onClick={async () => sendPrompt()}>
               <IoSend />
             </ActionIcon>
           }

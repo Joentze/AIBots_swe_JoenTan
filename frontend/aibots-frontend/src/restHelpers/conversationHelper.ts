@@ -30,15 +30,23 @@ export interface ConversationFull extends Conversation {
 
 export const getAllConversations =
   async (): Promise<AllConversationsResponse> => {
-    const response = await axios.get(`${API_ENDPOINT}/conversations`);
-    return response.data as AllConversationsResponse;
+    try {
+      const response = await axios.get(`${API_ENDPOINT}/conversations`);
+      return response.data as AllConversationsResponse;
+    } catch (e) {
+      throw Error(e as string);
+    }
   };
 
 export const getFullConversation = async (
   conversationId: string
 ): Promise<ConversationFull> => {
-  const response = await axios.get(
-    `${API_ENDPOINT}/conversations/${conversationId}`
-  );
-  return response.data as ConversationFull;
+  try {
+    const response = await axios.get(
+      `${API_ENDPOINT}/conversations/${conversationId}`
+    );
+    return response.data as ConversationFull;
+  } catch (e) {
+    throw Error(e as string);
+  }
 };
