@@ -2,29 +2,29 @@ import axios from "axios";
 
 const API_ENDPOINT = "http://localhost:8000";
 
-enum QueryRole {
+export enum QueryRole {
   USER = "user",
   SYSTEM = "system",
   FUNCTION = "function",
   ASSISTANT = "assistant",
 }
 
-interface Prompt {
+export interface Prompt {
   role: QueryRole;
   content: string;
 }
 
-interface Conversation {
+export interface Conversation {
   _id: string;
   name: string;
   params: object;
   tokens: number;
 }
-interface AllConversationsResponse {
+export interface AllConversationsResponse {
   data: Conversation[];
 }
 
-interface ConversationFull extends Conversation {
+export interface ConversationFull extends Conversation {
   messages: Prompt[];
 }
 
@@ -36,5 +36,9 @@ export const getAllConversations =
 
 export const getFullConversation = async (
   conversationId: string
-): Promise<ConversationFull> =>
-  axios.get(`${API_ENDPOINT}/conversations/${conversationId}`);
+): Promise<ConversationFull> => {
+  const response = await axios.get(
+    `${API_ENDPOINT}/conversations/${conversationId}`
+  );
+  return response.data as ConversationFull;
+};

@@ -34,7 +34,7 @@ export default function Home() {
           >
             <AppShell.Header>
               <Group h="100%" px="md">
-                Chat Bot
+                <p>Chat Bot</p>
               </Group>
             </AppShell.Header>
             <SideBar />
