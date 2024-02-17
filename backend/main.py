@@ -79,8 +79,13 @@ async def updates_conversation(id: str, convo: ConversationPUT):
 async def get_conversation_history(id: str):
     """Retrieves the entire conversation history with the LLM"""
     try:
-        return await ConversationFull.get(id)
-
+        doc = await ConversationFull.get(id)
+        doc_decrypt_messages = ConversationFull(name=doc.name,
+                                                params=doc.params,
+                                                tokens=doc.tokens,
+                                                messages=[decrypt_prompt(message.dict())
+                                                          for message in doc.messages])
+        return doc_decrypt_messages
     except AttributeError:
         return JSONResponse(content={"code": 404,
                                      "message": "Specified resource(s) was not found"},
@@ -121,10 +126,8 @@ async def send_prompt_query(id: str, prompt: Prompt):
 
         message_history = [decrypt_prompt(message.dict())
                            for message in doc.messages]
-        print(message_history)
         encrypted_prompt = encrypt_prompt(prompt)
 
-        print(encrypted_prompt)
         await add_token_count(id, content)
         await add_to_message_history(id, encrypted_prompt)
 
