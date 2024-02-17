@@ -1,29 +1,38 @@
 import { getAllConversations } from "@/restHelpers/conversationHelper";
-import { Button } from "@mantine/core";
+import { ActionIcon, AppShell, Button, Divider, Skeleton } from "@mantine/core";
+import { IoAdd } from "react-icons/io5";
 import { useEffect } from "react";
 import { useQuery } from "react-query";
+import { useConversation } from "@/app/customHooks/conversationHooks";
 
 const SideBar = () => {
+  const { conversationId, setConversationId } = useConversation();
   const { isLoading, error, data } = useQuery({
     queryKey: ["convoAll"],
     queryFn: getAllConversations,
   });
-
+  const setConv = (convoId: string) => {
+    setConversationId(convoId);
+  };
   return (
-    <div className="w-1/6 h-full flex flex-col gap-2 bg-gray-100">
-      <Button variant="outline" fullWidth>
-        Add Conversation
-      </Button>
-      <>
-        {data?.data.map((item) => {
-          return (
-            <p key={item._id} className="text-black">
-              {item.name}
-            </p>
-          );
-        })}
-      </>
-    </div>
+    <AppShell.Navbar p="md">
+      <Button leftSection={<IoAdd />}>Add Conversation</Button>
+      <Divider mt={8} />
+      <p className="text-gray-300">Conversations 💬</p>
+      {data?.data.map((item, index) => {
+        return (
+          <Button
+            fullWidth
+            mt={8}
+            variant="light"
+            key={item._id}
+            onClick={() => setConv(item._id)}
+          >
+            {item.name}
+          </Button>
+        );
+      })}
+    </AppShell.Navbar>
   );
 };
 

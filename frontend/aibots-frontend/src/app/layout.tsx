@@ -3,8 +3,8 @@ import React from "react";
 import { MantineProvider, ColorSchemeScript } from "@mantine/core";
 
 export const metadata = {
-  title: "Mantine Next.js template",
-  description: "I am using Mantine with Next.js!",
+  title: "Govtech Chat Bot",
+  description: "ChatGPT for all things Govtech!",
 };
 
 export default function RootLayout({ children }: { children: any }) {

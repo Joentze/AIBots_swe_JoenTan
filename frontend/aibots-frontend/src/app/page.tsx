@@ -11,6 +11,8 @@ import {
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import SideBar from "./components/SideBar/SideBar";
+import { ConversationProvider } from "./customHooks/conversationHooks";
+import MainChat from "./components/MainChat/MainChat";
 
 const queryClient = new QueryClient();
 
@@ -20,30 +22,27 @@ export default function Home() {
   return (
     <main>
       <QueryClientProvider client={queryClient}>
-        <AppShell
-          header={{ height: 60 }}
-          navbar={{
-            width: 300,
-            breakpoint: "sm",
-            collapsed: { mobile: !opened },
-          }}
-          padding="md"
-        >
-          <AppShell.Header>
-            <Group h="100%" px="md">
-              Chat Bot
-            </Group>
-          </AppShell.Header>
-          <AppShell.Navbar p="md">
-            <strong>Conversations 💬</strong>
-            {Array(15)
-              .fill(0)
-              .map((_, index) => (
-                <Skeleton key={index} h={28} mt="sm" animate={false} />
-              ))}
-          </AppShell.Navbar>
-          <AppShell.Main></AppShell.Main>
-        </AppShell>
+        <ConversationProvider>
+          <AppShell
+            header={{ height: 60 }}
+            navbar={{
+              width: 300,
+              breakpoint: "sm",
+              collapsed: { mobile: !opened },
+            }}
+            padding="md"
+          >
+            <AppShell.Header>
+              <Group h="100%" px="md">
+                Chat Bot
+              </Group>
+            </AppShell.Header>
+            <SideBar />
+            <AppShell.Main>
+              <MainChat />
+            </AppShell.Main>
+          </AppShell>
+        </ConversationProvider>
       </QueryClientProvider>
     </main>
   );

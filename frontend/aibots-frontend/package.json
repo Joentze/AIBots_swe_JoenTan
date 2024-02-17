@@ -11,10 +11,12 @@
   "dependencies": {
     "@mantine/core": "^7.5.3",
     "@mantine/hooks": "^7.5.3",
+    "@tabler/icons": "^2.47.0",
     "axios": "^1.6.7",
     "next": "14.1.0",
     "react": "^18",
     "react-dom": "^18",
+    "react-icons": "^5.0.1",
     "react-query": "^3.39.3"
   },
   "devDependencies": {
