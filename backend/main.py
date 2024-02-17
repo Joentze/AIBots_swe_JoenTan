@@ -12,7 +12,7 @@ from schemas.requests import ConversationPUT
 from beanie import init_beanie
 from handlers.mongo_handler import add_to_message_history
 from handlers.openai_handler import get_completion
-
+from anon.anonymiser import encrypt_prompt, decrypt_prompt
 app = FastAPI()
 
 
@@ -22,7 +22,7 @@ async def init():
     """initialises beanie"""
     print("initialising beanie...")
     client = AsyncIOMotorClient(
-        os.environ["MONGODB_ROUTE"]
+        "mongodb://root:example@localhost:27017/?authSource=admin&authMechanism=SCRAM-SHA-256"
     )
     await init_beanie(database=client.db_name, document_models=[ConversationFull])
 
@@ -118,15 +118,19 @@ async def send_prompt_query(id: str, prompt: Prompt):
 
         params = doc.params
 
-        message_history = [dict(message) for message in doc.messages]
+        message_history = [decrypt_prompt(message.dict())
+                           for message in doc.messages]
+        print(message_history)
+        encrypted_prompt = encrypt_prompt(prompt)
 
-        await add_to_message_history(id, prompt)
+        print(encrypted_prompt)
+        await add_to_message_history(id, encrypted_prompt)
 
         try:
 
             llm_response = await get_completion([*message_history, {"role": role, "content": content}], params={"model": "gpt-3.5-turbo", **params})
 
-            message = await add_to_message_history(id, llm_response)
+            message = await add_to_message_history(id, encrypt_prompt(llm_response))
 
             return {"id": message.to_json()["id"]}
         except Exception as e:
@@ -134,7 +138,8 @@ async def send_prompt_query(id: str, prompt: Prompt):
             return JSONResponse(content={"code": 422,
                                          "message": "Unable to create resource"},
                                 status_code=422)
-    except AttributeError:
+    except AttributeError as e:
+        print(e)
         return JSONResponse(content={"code": 404,
                                      "message": "Specified resource(s) was not found"},
                             status_code=404)

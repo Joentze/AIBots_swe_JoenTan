@@ -24,8 +24,8 @@ async def get_completion(messages: List[Prompt], params: object = {}) -> Prompt:
     if tool_calls:
         function_name = tool_calls[0].function.name
         function_args = json.loads(tool_calls[0].function.arguments)
-        return {"role": "function", "content": json.dumps(function_args), "name": function_name}
-    return {"role": role, "content": content}
+        return Prompt(**{"role": "function", "content": json.dumps(function_args), "name": function_name})
+    return Prompt(**{"role": role, "content": content})
 
 
 def format_role_content(messages: object) -> List[Prompt]:
