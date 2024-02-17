@@ -22,7 +22,7 @@ const MainChat = () => {
   const [currPrompt, setCurrPrompt] = useState<string>("");
   const [messages, setMessages] = useState<Prompt[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
-  const bottomLine = useRef<HTMLDivElement>("");
+  const bottomLine = useRef<HTMLDivElement>();
 
   useEffect(() => {
     const getChatHistory = async () => {

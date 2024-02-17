@@ -15,13 +15,16 @@ import CreateConvoPopup from "../Modal/CreateConvoPopup";
 
 const SideBar = () => {
   const { conversationId, setConversationId } = useConversation();
-  const { isLoading, error, data } = useQuery({
+  const { isLoading, error, data, refetch } = useQuery({
     queryKey: ["convoAll"],
     queryFn: getAllConversations,
   });
   const setConv = (convoId: string) => {
     setConversationId(convoId);
   };
+  useEffect(() => {
+    refetch();
+  }, [conversationId]);
   return (
     <AppShell.Navbar p="md">
       <CreateConvoPopup />
