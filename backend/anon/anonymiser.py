@@ -4,7 +4,7 @@ import base64
 from cryptography.fernet import Fernet
 from schemas.Prompt import Prompt
 
-ENCRYPTION_KEY = "yO66W8yGo_VL8w6M4PqQosRsuEg6qK52sch6S01UkLw="
+ENCRYPTION_KEY = os.environ["ENCRYPTION_KEY"]
 
 
 def encrypt_data(input_string: str) -> str:

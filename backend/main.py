@@ -3,6 +3,7 @@ import os
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 from schemas.Conversation import Conversation, ConversationFull, ConversationList
 from schemas.responses import CreatedResponse
@@ -14,7 +15,20 @@ from handlers.mongo_handler import add_to_message_history, add_token_count
 from handlers.openai_handler import get_completion
 from anon.anonymiser import encrypt_prompt, decrypt_prompt
 
+
 app = FastAPI()
+
+origins = [
+    "*"
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 @app.on_event("startup")
@@ -22,9 +36,7 @@ async def init():
     # Create Motor client
     """initialises beanie"""
     print("initialising beanie...")
-    client = AsyncIOMotorClient(
-        "mongodb://root:example@localhost:27017/?authSource=admin&authMechanism=SCRAM-SHA-256"
-    )
+    client = AsyncIOMotorClient(os.environ["MONGODB_ROUTE"])
     await init_beanie(database=client.db_name, document_models=[ConversationFull])
 
 
@@ -80,11 +92,13 @@ async def get_conversation_history(id: str):
     """Retrieves the entire conversation history with the LLM"""
     try:
         doc = await ConversationFull.get(id)
-        doc_decrypt_messages = ConversationFull(name=doc.name,
-                                                params=doc.params,
-                                                tokens=doc.tokens,
-                                                messages=[decrypt_prompt(message.dict())
-                                                          for message in doc.messages])
+        doc_decrypt_messages = ConversationFull(
+            _id=id,
+            name=doc.name,
+            params=doc.params,
+            tokens=doc.tokens,
+            messages=[decrypt_prompt(message.dict())
+                      for message in doc.messages])
         return doc_decrypt_messages
     except AttributeError:
         return JSONResponse(content={"code": 404,
@@ -129,15 +143,19 @@ async def send_prompt_query(id: str, prompt: Prompt):
         encrypted_prompt = encrypt_prompt(prompt)
 
         await add_token_count(id, content)
+
         await add_to_message_history(id, encrypted_prompt)
 
         try:
 
             llm_response = await get_completion([*message_history, {"role": role, "content": content}], params={"model": "gpt-3.5-turbo", **params})
+
             await add_token_count(id, llm_response.content)
+
             message = await add_to_message_history(id, encrypt_prompt(llm_response))
 
             return {"id": message.to_json()["id"]}
+
         except Exception as e:
             print(e)
             return JSONResponse(content={"code": 422,
