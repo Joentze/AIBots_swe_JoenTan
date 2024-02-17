@@ -10,9 +10,10 @@ from schemas.Prompt import Prompt
 from pydantic import error_wrappers
 from schemas.requests import ConversationPUT
 from beanie import init_beanie
-from handlers.mongo_handler import add_to_message_history
+from handlers.mongo_handler import add_to_message_history, add_token_count
 from handlers.openai_handler import get_completion
 from anon.anonymiser import encrypt_prompt, decrypt_prompt
+
 app = FastAPI()
 
 
@@ -124,12 +125,13 @@ async def send_prompt_query(id: str, prompt: Prompt):
         encrypted_prompt = encrypt_prompt(prompt)
 
         print(encrypted_prompt)
+        await add_token_count(id, content)
         await add_to_message_history(id, encrypted_prompt)
 
         try:
 
             llm_response = await get_completion([*message_history, {"role": role, "content": content}], params={"model": "gpt-3.5-turbo", **params})
-
+            await add_token_count(id, llm_response.content)
             message = await add_to_message_history(id, encrypt_prompt(llm_response))
 
             return {"id": message.to_json()["id"]}
