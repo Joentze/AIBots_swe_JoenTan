@@ -7,25 +7,43 @@ import {
   Group,
 } from "@mantine/core";
 import { useConversation } from "@/app/customHooks/conversationHooks";
-import { getFullConversation, Prompt } from "@/restHelpers/conversationHelper";
+import {
+  getFullConversation,
+  Prompt,
+  QueryRole,
+} from "@/restHelpers/conversationHelper";
 import { useEffect, useState } from "react";
 import { IoSend } from "react-icons/io5";
 import MessageBox from "../Messages/MessageBox";
-
+import { postQuery } from "@/restHelpers/conversationHelper";
 const MainChat = () => {
   const { conversationId, setConversationId } = useConversation();
   const [currPrompt, setCurrPrompt] = useState<string>("");
-  const [messages, setMessages] = useState<Prompt[]>();
+  const [messages, setMessages] = useState<Prompt[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
   useEffect(() => {
     const getChatHistory = async () => {
       const { messages } = await getFullConversation(conversationId);
       setMessages(messages);
     };
     getChatHistory();
-  }, [conversationId]);
+  }, [conversationId, loading]);
 
   const sendPrompt = async () => {
     setCurrPrompt("");
+    try {
+      setLoading(true);
+      const sentPrompt = {
+        role: QueryRole.USER,
+        content: currPrompt,
+      };
+      setMessages((prevMessages: Prompt[]) => [...prevMessages, sentPrompt]);
+      const { id } = await postQuery(conversationId, sentPrompt);
+      setConversationId(id);
+      setLoading(false);
+    } catch (e) {
+      alert(e);
+    }
   };
   return (
     <Container>

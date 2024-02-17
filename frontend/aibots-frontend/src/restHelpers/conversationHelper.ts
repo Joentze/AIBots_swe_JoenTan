@@ -28,6 +28,10 @@ export interface ConversationFull extends Conversation {
   messages: Prompt[];
 }
 
+export interface CreatedResponse {
+  id: string;
+}
+
 export const getAllConversations =
   async (): Promise<AllConversationsResponse> => {
     try {
@@ -46,6 +50,23 @@ export const getFullConversation = async (
       `${API_ENDPOINT}/conversations/${conversationId}`
     );
     return response.data as ConversationFull;
+  } catch (e) {
+    throw Error(e as string);
+  }
+};
+
+export const postQuery = async (
+  conversationId: string,
+  query: Prompt
+): Promise<CreatedResponse> => {
+  try {
+    const response = await axios.post(
+      `${API_ENDPOINT}/queries?id=${conversationId}`,
+      query
+    );
+    const { data } = response;
+    console.log(data);
+    return data as CreatedResponse;
   } catch (e) {
     throw Error(e as string);
   }
