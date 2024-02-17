@@ -22,7 +22,7 @@ const MainChat = () => {
   const [currPrompt, setCurrPrompt] = useState<string>("");
   const [messages, setMessages] = useState<Prompt[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
-  const bottomLine = useRef<HTMLDivElement>();
+  const bottomLine = useRef<HTMLDivElement>("");
 
   useEffect(() => {
     const getChatHistory = async () => {
@@ -66,21 +66,25 @@ const MainChat = () => {
         )}
         <div ref={bottomLine} />
       </ScrollArea>
-      <Container hidden={conversationId === undefined}>
-        <Input
-          disabled={loading}
-          value={currPrompt}
-          onChange={(event) => setCurrPrompt(event.target.value)}
-          placeholder="Chat here..."
-          size="lg"
-          rightSectionPointerEvents="all"
-          rightSection={
-            <ActionIcon size={"lg"} onClick={async () => sendPrompt()}>
-              {loading ? <Loader color="white" size={"sm"} /> : <IoSend />}
-            </ActionIcon>
-          }
-        />
-      </Container>
+      {conversationId ? (
+        <Container hidden={conversationId === undefined}>
+          <Input
+            disabled={loading || conversationId === undefined}
+            value={currPrompt}
+            onChange={(event) => setCurrPrompt(event.target.value)}
+            placeholder="Chat here..."
+            size="lg"
+            rightSectionPointerEvents="all"
+            rightSection={
+              <ActionIcon size={"lg"} onClick={async () => sendPrompt()}>
+                {loading ? <Loader color="white" size={"sm"} /> : <IoSend />}
+              </ActionIcon>
+            }
+          />
+        </Container>
+      ) : (
+        <></>
+      )}
     </Container>
   );
 };

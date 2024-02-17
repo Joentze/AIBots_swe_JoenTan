@@ -11,6 +11,7 @@ import { IoAdd } from "react-icons/io5";
 import { useEffect } from "react";
 import { useQuery } from "react-query";
 import { useConversation } from "@/app/customHooks/conversationHooks";
+import CreateConvoPopup from "../Modal/CreateConvoPopup";
 
 const SideBar = () => {
   const { conversationId, setConversationId } = useConversation();
@@ -23,7 +24,7 @@ const SideBar = () => {
   };
   return (
     <AppShell.Navbar p="md">
-      <Button leftSection={<IoAdd />}>Add Conversation</Button>
+      <CreateConvoPopup />
       <Divider mt={8} />
       <Text mt={8} fw={800}>
         Conversations 💬
