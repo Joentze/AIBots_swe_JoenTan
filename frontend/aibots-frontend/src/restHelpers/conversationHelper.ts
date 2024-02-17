@@ -20,6 +20,13 @@ export interface Conversation {
   params: object;
   tokens: number;
 }
+
+export interface CreateConversationBody {
+  name: string;
+  params: object;
+  tokens: number;
+}
+
 export interface AllConversationsResponse {
   data: Conversation[];
 }
@@ -38,7 +45,7 @@ export const getAllConversations =
       const response = await axios.get(`${API_ENDPOINT}/conversations`);
       return response.data as AllConversationsResponse;
     } catch (e) {
-      throw Error(e as string);
+      throw new Error(e as string);
     }
   };
 
@@ -51,7 +58,7 @@ export const getFullConversation = async (
     );
     return response.data as ConversationFull;
   } catch (e) {
-    throw Error(e as string);
+    throw new Error(e as string);
   }
 };
 
@@ -68,6 +75,21 @@ export const postQuery = async (
     console.log(data);
     return data as CreatedResponse;
   } catch (e) {
-    throw Error(e as string);
+    throw new Error(e as string);
+  }
+};
+
+export const createConversation = async (
+  convoBody: CreateConversationBody
+): Promise<CreatedResponse> => {
+  try {
+    const response = await axios.post(
+      `${API_ENDPOINT}/conversations`,
+      convoBody
+    );
+    const { data } = response;
+    return data as CreatedResponse;
+  } catch (e) {
+    throw new Error(e as string);
   }
 };
