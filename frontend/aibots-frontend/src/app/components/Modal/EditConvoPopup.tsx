@@ -1,34 +1,39 @@
 import { useDisclosure } from "@mantine/hooks";
 import { Modal, Button, Input, JsonInput, ActionIcon } from "@mantine/core";
 import { IoAdd, IoCog } from "react-icons/io5";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useConversation } from "@/app/customHooks/conversationHooks";
 import { validateCreateConversation } from "@/validators/validateCreateConversation";
-import { createConversation } from "@/restHelpers/conversationHelper";
+import {
+  editConversation,
+  getFullConversation,
+} from "@/restHelpers/conversationHelper";
 
-interface IEditConvoPopup {
-  name: string;
-  params: string;
-}
-
-const EditConvoPopup: React.FC<IEditConvoPopup> = ({ name, params }) => {
+const EditConvoPopup = () => {
   const { conversationId, setConversationId } = useConversation();
   const [loading, setLoading] = useState<boolean>(false);
   const [opened, { open, close }] = useDisclosure(false);
-  const [conversationName, setConversationName] = useState<string>(name);
-  const [jsonValue, setJsonValue] = useState(JSON.stringify(params));
+  const [conversationName, setConversationName] = useState<string>("");
+  const [jsonValue, setJsonValue] = useState<string>(JSON.stringify(""));
 
-  const createConvo = async () => {
+  useEffect(() => {
+    const getConversationDetails = async () => {
+      const { name, params } = await getFullConversation(conversationId);
+      setConversationName(name);
+      setJsonValue(JSON.stringify(params));
+    };
+    getConversationDetails();
+  }, [conversationId]);
+
+  const editConvo = async () => {
     try {
       validateCreateConversation(conversationName, jsonValue);
       setLoading(true);
-      const { id } = await createConversation({
+      await editConversation(conversationId, {
         name: conversationName,
         params: JSON.parse(jsonValue),
-        tokens: 0,
       });
       setLoading(false);
-      setConversationId(id);
     } catch (e) {
       alert(e);
     }
@@ -46,7 +51,7 @@ const EditConvoPopup: React.FC<IEditConvoPopup> = ({ name, params }) => {
             description="Edit your conversation name to suit your task better!"
           >
             <Input
-              defaultValue={name}
+              defaultValue={conversationName}
               value={conversationName}
               placeholder="Example: an Exploration into Large Language Models"
               onChange={(event) => setConversationName(event.target.value)}
@@ -59,7 +64,7 @@ const EditConvoPopup: React.FC<IEditConvoPopup> = ({ name, params }) => {
             description="Set OpenAI chat parameters"
           >
             <JsonInput
-              defaultValue={params}
+              defaultValue={jsonValue}
               value={jsonValue}
               onChange={setJsonValue}
               mt={8}
@@ -71,7 +76,7 @@ const EditConvoPopup: React.FC<IEditConvoPopup> = ({ name, params }) => {
             loaderProps={{ type: "dots" }}
             fullWidth
             onClick={async () => {
-              await createConvo();
+              await editConvo();
               close();
             }}
           >

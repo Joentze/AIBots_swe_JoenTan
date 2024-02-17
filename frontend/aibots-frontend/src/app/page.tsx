@@ -7,6 +7,7 @@ import {
   Group,
   MantineProvider,
   Skeleton,
+  Text,
   useMantineTheme,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
@@ -34,7 +35,9 @@ export default function Home() {
           >
             <AppShell.Header>
               <Group h="100%" px="md">
-                <p>Chat Bot</p>
+                <Text fw={700} size="lg">
+                  Govtech ChatGPT 🇸🇬
+                </Text>
               </Group>
             </AppShell.Header>
             <SideBar />

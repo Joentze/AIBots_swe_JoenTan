@@ -1,10 +1,9 @@
 import {
   ActionIcon,
   Container,
-  Flex,
   Input,
   ScrollArea,
-  Group,
+  Text,
   Loader,
 } from "@mantine/core";
 import { useConversation } from "@/app/customHooks/conversationHooks";
@@ -23,18 +22,14 @@ const MainChat = () => {
   const [currPrompt, setCurrPrompt] = useState<string>("");
   const [messages, setMessages] = useState<Prompt[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
-  const [name, setName] = useState<string>("");
-  const [params, setParams] = useState<string>("");
-  const bottomLine = useRef<HTMLDivElement>();
+
+  const bottomLine = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const getChatHistory = async () => {
       const { name, params, tokens, messages } = await getFullConversation(
         conversationId
       );
-      console.log(name, params);
-      setName(name);
-      setParams(JSON.stringify(params));
       setMessages(messages);
     };
     getChatHistory();
@@ -84,7 +79,7 @@ const MainChat = () => {
             size="lg"
             rightSectionPointerEvents="all"
             leftSectionPointerEvents="all"
-            leftSection={<EditConvoPopup name={name} params={params} />}
+            leftSection={<EditConvoPopup />}
             rightSection={
               <ActionIcon size={"lg"} onClick={async () => sendPrompt()}>
                 {loading ? <Loader color="white" size={"sm"} /> : <IoSend />}
@@ -93,7 +88,7 @@ const MainChat = () => {
           />
         </Container>
       ) : (
-        <></>
+        <Text ta={"center"}>Create or Select a Conversation to start 🚀</Text>
       )}
     </Container>
   );

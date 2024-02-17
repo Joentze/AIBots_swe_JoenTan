@@ -4,10 +4,11 @@ import {
   AppShell,
   Button,
   Divider,
+  Flex,
   Skeleton,
   Text,
 } from "@mantine/core";
-import { IoAdd } from "react-icons/io5";
+import { IoAdd, IoReload } from "react-icons/io5";
 import { useEffect } from "react";
 import { useQuery } from "react-query";
 import { useConversation } from "@/app/customHooks/conversationHooks";
@@ -29,9 +30,14 @@ const SideBar = () => {
     <AppShell.Navbar p="md">
       <CreateConvoPopup />
       <Divider mt={8} />
-      <Text mt={8} fw={800}>
-        Conversations 💬
-      </Text>
+      <Flex>
+        <Text mt={8} fw={500} w={"100%"} c={"gray"}>
+          Conversations 💬
+        </Text>
+        <ActionIcon mt={5} variant="subtle" onClick={() => refetch()}>
+          <IoReload />
+        </ActionIcon>
+      </Flex>
       {data?.data.map((item, index) => {
         return (
           <>

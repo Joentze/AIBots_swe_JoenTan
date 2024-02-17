@@ -9,7 +9,7 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: example
-   
+
   mongo-express:
     image: mongo-express
     restart: always
@@ -21,6 +21,7 @@ services:
       ME_CONFIG_MONGODB_URL: mongodb://root:example@host.docker.internal:27017/
 
   backend:
+    container_name: backend
     build: ./backend
     restart: always
     ports:
@@ -29,3 +30,12 @@ services:
       - .env
     depends_on:
       - mongodb
+  frontend:
+    container_name: frontend
+    build: ./frontend/aibots-frontend
+    ports:
+      - 3000:3000
+    env_file:
+      - .env
+    depends_on:
+      - backend
