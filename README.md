@@ -39,6 +39,18 @@ Once the images have been pulled, and containers provisioned we will have 4 cont
 
 ### Testing Locally 🧪
 
+#### Testing APIs w/ pytest 🐍
+
+To test APIs for **Test Driven Development (TDD)**, run the following commands:
+
+```
+docker compose up -d
+cd ./backend
+pip install -r requirements.txt
+cd ./tests
+pytest test_apis.py
+```
+
 #### Postman 📩
 
 In the repository, a json configuration file named `ESD Project.postman_collection.json` is provided. To test the API suite import the json file into Postman using the following steps:
