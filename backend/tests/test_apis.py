@@ -101,3 +101,58 @@ def test_wrong_format_put_request(test_client):
     assert code == 400
 
     assert message == "Invalid Parameters Provided"
+
+
+def test_query_llm(test_client):
+    """tests POST request to create new conversation"""
+    test_post_data = {
+        "role": "user",
+        "content": "Who is lee hsien loong"
+    }
+
+    response = test_client.post(
+        f"/queries?id={test_document_id}", json=test_post_data)
+
+    assert response.status_code == 201
+    # test response
+    id_return = response.json()["id"]
+
+    assert isinstance(id_return, str)
+
+
+def test_wrong_format_query_llm(test_client):
+    """tests POST request to create new conversation"""
+    test_wrong_format = {
+        "role": "not an actual role",
+        "content": 0
+    }
+
+    response = test_client.post(
+        f"/queries?id={test_document_id}", json=test_wrong_format)
+
+    assert response.status_code == 400
+
+    response = response.json()
+
+    code, message = response["code"], response["message"]
+
+    assert code == 400
+
+    assert message == "Invalid Parameters Provided"
+
+
+def test_get_full_conversations(test_client):
+    """tests all conversaiotns GET request"""
+    response = test_client.get(f"/conversations/{test_document_id}")
+    # tests response code
+    assert response.status_code == 200
+
+    # test model of each conversation
+    conversation = response.json()
+    assert ConversationFull(**conversation)
+
+
+def test_delete_conversation(test_client):
+    """tests DELETE request"""
+    response = test_client.delete(f"/conversations/{test_document_id}")
+    assert response.status_code == 204

@@ -112,7 +112,7 @@ async def get_conversation_history(id: str):
                             status_code=500)
 
 
-@app.delete("/conversations/{id}", status_code=200)
+@app.delete("/conversations/{id}", status_code=204)
 async def delete_conversation(id: str):
     """Deletes the entire conversation history with the LLM Model"""
     try:
