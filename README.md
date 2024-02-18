@@ -45,7 +45,17 @@ Once the images have been pulled, and containers provisioned we will have 4 cont
 
 #### Testing APIs w/ pytest 🐍
 
-To test APIs for **Test Driven Development (TDD)**, run the following commands:
+To test APIs for **Test Driven Development (TDD)**, set the relevant environment variables:
+
+For `MONGODB_ROUTE` use `localhost` instead of `host.docker.internal`
+
+```
+export OPENAI_API_KEY=...
+export MONGODB_ROUTE=...
+export ENCRYPTION_KEY=...
+```
+
+run the following commands:
 
 ```
 docker compose up -d
