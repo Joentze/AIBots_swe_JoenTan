@@ -14,6 +14,7 @@ from beanie import init_beanie
 from handlers.mongo_handler import add_to_message_history, add_token_count
 from handlers.openai_handler import get_completion
 from anon.anonymiser import encrypt_prompt, decrypt_prompt
+from beanie.exceptions import DocumentNotFound
 
 
 app = FastAPI()
@@ -76,7 +77,7 @@ async def updates_conversation(id: str, convo: ConversationPUT):
     try:
         doc = await ConversationFull.get(id)
         await doc.set({ConversationFull.name: convo.name, ConversationFull.params: convo.params})
-    except AttributeError:
+    except DocumentNotFound:
         return JSONResponse(content={"code": 404,
                                      "message": "Specified resource(s) was not found"},
                             status_code=404)
@@ -100,7 +101,7 @@ async def get_conversation_history(id: str):
             messages=[decrypt_prompt(message.dict())
                       for message in doc.messages])
         return doc_decrypt_messages
-    except AttributeError:
+    except DocumentNotFound:
         return JSONResponse(content={"code": 404,
                                      "message": "Specified resource(s) was not found"},
                             status_code=404)
@@ -117,7 +118,7 @@ async def delete_conversation(id: str):
     try:
         convo = await ConversationFull.get(id)
         await convo.delete()
-    except AttributeError:
+    except DocumentNotFound:
         return JSONResponse(content={"code": 404,
                                      "message": "Specified resource(s) was not found"},
                             status_code=404)
@@ -161,7 +162,7 @@ async def send_prompt_query(id: str, prompt: Prompt):
             return JSONResponse(content={"code": 422,
                                          "message": "Unable to create resource"},
                                 status_code=422)
-    except AttributeError as e:
+    except DocumentNotFound as e:
         print(e)
         return JSONResponse(content={"code": 404,
                                      "message": "Specified resource(s) was not found"},

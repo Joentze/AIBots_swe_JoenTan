@@ -6,6 +6,9 @@ from main import app
 from schemas.Conversation import Conversation, ConversationFull
 
 
+test_document_id = None
+
+
 @pytest.fixture(scope="module")
 def test_client():
     with TestClient(app) as client:
@@ -31,8 +34,70 @@ def test_post_new_conversation(test_client):
         "params": {},
         "tokens": 0
     }
+
     response = test_client.post("/conversations", json=test_post_data)
-    print(response)
+
     assert response.status_code == 201
     # test response
-    assert isinstance(response.json()["id"], str)
+    global test_document_id
+
+    test_document_id = response.json()["id"]
+
+    assert isinstance(test_document_id, str)
+
+
+def test_wrong_format_post_conversation_request(test_client):
+    """tests POST request on wrong format"""
+
+    test_wrong_format = {
+        "name": 101,
+        "params": {},
+        "tokens": 0
+    }
+
+    response = test_client.post(
+        "/conversations", json=test_wrong_format)
+
+    assert response.status_code == 400
+
+    response = response.json()
+
+    code, message = response["code"], response["message"]
+
+    assert code == 400
+
+    assert message == "Invalid Parameters Provided"
+
+
+def test_put_request(test_client):
+    """tests PUT request to update conversation name, params"""
+    test_put_data = {
+        "name": "hello there",
+        "params": {},
+    }
+
+    response = test_client.put(
+        f"/conversations/{test_document_id}", json=test_put_data)
+
+    assert response.status_code == 204
+
+
+def test_wrong_format_put_request(test_client):
+    """tests PUT request for wrong format"""
+    test_wrong_format = {
+        "name": 101,
+        "params": {},
+    }
+
+    response = test_client.put(
+        f"/conversations/{test_document_id}", json=test_wrong_format)
+
+    assert response.status_code == 400
+
+    response = response.json()
+
+    code, message = response["code"], response["message"]
+
+    assert code == 400
+
+    assert message == "Invalid Parameters Provided"
